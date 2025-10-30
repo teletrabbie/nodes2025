@@ -5,7 +5,7 @@ CREATE (Substance)<-[:HAS_ATC]-(Medicament)-[:HAS_PRICE]->(Package),
 
 
 
-// Example: graph algorithms and shortest path do not work with "common" nodes instead of attributes
+// Example 1: graph algorithms and shortest path do not work with "common" nodes instead of attributes
 
 // Create data with application/unit as own label
 MERGE (n:Application {Code: 'IV'}) SET n.Description = 'intravenous';
@@ -21,7 +21,7 @@ MERGE (n:Medicament {Name: 'imnovid'});
 MERGE (n:Indication {Name: 'multiple myeloma'});
 
 
-// Create the relationships bteween the nodes
+// Create the relationships between the nodes
 MATCH (s:Substance {Code: 'L04AX06'})
 MATCH (u:Unit {Code: 'mg'})
 MERGE (s)-[:HAS]->(u)
@@ -72,14 +72,35 @@ MATCH (n:Unit) DETACH DELETE n;
 
 
 
-// Example: n:m tables from RDBMS as relation in graphs
+// Example 2: n:m tables from RDBMS as relation in graphs
+
+// Create nodes
+WITH 'https://raw.githubusercontent.com/teletrabbie/nodes2025/refs/heads/main/import/case.csv' AS import
+LOAD CSV WITH HEADERS FROM import AS row FIELDTERMINATOR ';'
+MERGE (n:Case {Patient: row.patient_id})
+  SET n.Discharge = date(row.discharge),
+      n.id = toInteger(row.id)
+;
+
+WITH 'https://raw.githubusercontent.com/teletrabbie/nodes2025/refs/heads/main/import/substance.csv' AS import
+LOAD CSV WITH HEADERS FROM import AS row FIELDTERMINATOR ';'
+MERGE (n:Substance {Code: row.atc_code})
+  SET n.id = toInteger(row.id)
+;
 
 // create relationship between the nodes instead of using n:m tables
-LOAD CSV WITH HEADERS FROM 'file:///case_substance.csv' AS row
+WITH 'https://raw.githubusercontent.com/teletrabbie/nodes2025/refs/heads/main/import/case_substance.csv' AS import
+LOAD CSV WITH HEADERS FROM import AS row FIELDTERMINATOR ';'
 MATCH (c:Case {id: toInteger(row.case_id)})
-MATCH (s:Substance {id: row.substance_id})
-MERGE (s)-[:APPLIED {dose: row.dose}]->(c);
+MATCH (s:Substance {id: toInteger(row.substance_id)})
+MERGE (s)-[:APPLIED {dose: toInteger(row.dose)}]->(c) 
+;
 
+// Show graph
+MATCH (c:Case)
+OPTIONAL MATCH (s:Substance)-[a:APPLIED]->(c)
+RETURN *
+;
 
 
 // Example: Arrays
