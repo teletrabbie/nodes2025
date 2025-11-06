@@ -17,6 +17,9 @@ In this repository you will find the cypher queries of my examples, tha data for
 
 * Be careful with transferring “hierarchy” or “dimension tables” from RDBMS to graphs: probably better use attributes and not lables
 * In graphs you can create edges instead of n:m tables (and you can anylse clusters easyly)
+* Cypher statement MERGE … SET is like
+  * UPDATE in SQL, if nodes exists
+  * INSERT in SQL, if nodes dose not exist
 * Arrays are normal in graphs and not the exception (“forget” 3NF or BCNF)
 * Flexible relationships in graphs are useful, especially if there is “tidy” data in your source
 * Store important codes as attribute in the nodes, so that you can “recycle” them
